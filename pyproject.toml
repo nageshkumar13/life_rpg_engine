@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "life-rpg-backend"
+version = "0.1.0"
+description = "Backend rules engine for LIFE RPG ENGINE"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.116.1",
+    "uvicorn[standard]==0.35.0",
+    "sqlalchemy==2.0.43",
+    "alembic==1.16.4",
+    "psycopg==3.2.9",
+    "pydantic==2.11.7",
+    "pydantic-settings==2.10.1",
+    "email-validator==2.2.0",
+    "python-dotenv==1.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.1",
+    "httpx==0.28.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["app/tests"]
+pythonpath = ["."]
+
+[tool.setuptools]
+packages = [
+    "app",
+    "app.api",
+    "app.api.v1",
+    "app.core",
+    "app.db",
+    "app.models",
+    "app.schemas",
+    "app.repositories",
+    "app.services",
+    "app.utils",
+    "app.workers",
+]
