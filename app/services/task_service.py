@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.core.enums import TaskStatus
-from app.core.exceptions import NotFoundError
+from app.core.exceptions import NotFoundError, ValidationError
 from app.models.task import Task
 from app.models.task_chunk import TaskChunk
 from app.repositories.task_chunk_repository import TaskChunkRepository
@@ -56,6 +56,8 @@ class TaskService:
 
     def mark_active(self, task_id: str) -> Task:
         task = self.get_task(task_id)
+        if task.status != TaskStatus.PLANNED:
+            raise ValidationError("Only planned tasks can be marked active")
         task.status = TaskStatus.ACTIVE
         self.task_repository.update(task)
         self.db.commit()
@@ -70,6 +72,8 @@ class TaskService:
 
     def mark_missed(self, task_id: str) -> Task:
         task = self.get_task(task_id)
+        if task.status not in {TaskStatus.PLANNED, TaskStatus.ACTIVE}:
+            raise ValidationError("Only planned or active tasks can be marked missed")
         task.status = TaskStatus.MISSED
         self.task_repository.update(task)
         self.db.commit()
@@ -111,4 +115,3 @@ class TaskService:
         self.chunk_repository.delete(chunk)
         self.progress_service.recalculate_task_progress(task)
         self.db.commit()
-

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timedelta, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -20,8 +20,11 @@ class XPRepository:
         return list(self.db.scalars(stmt).all())
 
     def total_for_day(self, user_id: str, target_date: date) -> int:
+        start = datetime.combine(target_date, time.min, tzinfo=timezone.utc)
+        end = start + timedelta(days=1)
         stmt = select(func.coalesce(func.sum(XPLog.xp_delta), 0)).where(
             XPLog.user_id == user_id,
-            func.date(XPLog.created_at) == target_date.isoformat(),
+            XPLog.created_at >= start,
+            XPLog.created_at < end,
         )
         return int(self.db.scalar(stmt) or 0)

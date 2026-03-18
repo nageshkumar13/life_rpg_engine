@@ -15,7 +15,8 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 @app.on_event("startup")
 def startup() -> None:
-    init_db()
+    if settings.environment.lower() != "test":
+        init_db()
 
 
 @app.get("/")

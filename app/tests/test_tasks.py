@@ -32,3 +32,23 @@ def test_task_chunk_completion_updates_parent_and_logs_xp(client, user):
     assert xp_response.status_code == 200
     assert len(xp_response.json()["items"]) == 3
 
+
+def test_done_task_cannot_be_marked_active_again(client, user):
+    task_response = client.post(
+        "/api/v1/tasks",
+        json={
+            "user_id": user.id,
+            "title": "Close the loop",
+            "type": "PLANNED",
+            "importance_score": 3,
+            "estimated_minutes_total": 30,
+            "assigned_day": date.today().isoformat(),
+        },
+    )
+    task_id = task_response.json()["id"]
+
+    done_response = client.post(f"/api/v1/tasks/{task_id}/done")
+    assert done_response.status_code == 200
+
+    invalid_response = client.post(f"/api/v1/tasks/{task_id}/active")
+    assert invalid_response.status_code == 400

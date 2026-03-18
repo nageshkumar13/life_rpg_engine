@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.core.enums import HabitLogStatus, XPSourceType
-from app.core.exceptions import NotFoundError
+from app.core.exceptions import NotFoundError, ValidationError
 from app.models.habit import Habit
 from app.models.habit_log import HabitLog
 from app.repositories.habit_log_repository import HabitLogRepository
@@ -65,6 +65,10 @@ class HabitService:
         if not log:
             log = HabitLog(id=new_id(), habit_id=habit.id, user_id=habit.user_id, log_date=log_date)
             self.log_repository.create(log)
+        elif log.status == HabitLogStatus.COMPLETED:
+            return log
+        elif log.status == HabitLogStatus.MISSED:
+            raise ValidationError("Missed habit logs cannot be converted to completed without recalculating streak history")
 
         user = self.user_repository.get(habit.user_id)
         if not user:
@@ -97,6 +101,10 @@ class HabitService:
         if not log:
             log = HabitLog(id=new_id(), habit_id=habit.id, user_id=habit.user_id, log_date=log_date)
             self.log_repository.create(log)
+        elif log.status == HabitLogStatus.MISSED:
+            return log
+        elif log.status == HabitLogStatus.COMPLETED:
+            raise ValidationError("Completed habit logs cannot be marked missed without recalculating streak history")
 
         user = self.user_repository.get(habit.user_id)
         if not user:
@@ -111,4 +119,3 @@ class HabitService:
         self.db.commit()
         self.db.refresh(log)
         return log
-

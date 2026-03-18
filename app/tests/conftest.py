@@ -1,3 +1,4 @@
+import os
 from collections.abc import Generator
 
 import pytest
@@ -8,8 +9,11 @@ from sqlalchemy.pool import StaticPool
 
 from app.api.deps import get_db
 from app.db.base import Base
-from app.main import app
 from app.models.user import User
+
+os.environ["ENVIRONMENT"] = "test"
+
+from app.main import app
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite://"
@@ -55,4 +59,3 @@ def user(db_session: Session) -> User:
     db_session.commit()
     db_session.refresh(demo)
     return demo
-
