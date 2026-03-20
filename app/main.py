@@ -8,15 +8,10 @@ from app.db.init_db import init_db
 
 settings = get_settings()
 configure_logging(settings.log_level)
+init_db()
 
 app = FastAPI(title=settings.app_name)
 app.include_router(api_router, prefix=settings.api_v1_prefix)
-
-
-@app.on_event("startup")
-def startup() -> None:
-    if settings.environment.lower() != "test":
-        init_db()
 
 
 @app.get("/")

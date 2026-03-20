@@ -8,7 +8,7 @@ from app.schemas.task_chunk import TaskChunkRead
 
 
 class TaskCreate(BaseModel):
-    user_id: str
+    user_id: str | None = None
     title: str
     description: str | None = None
     type: TaskType = TaskType.PLANNED
@@ -46,4 +46,3 @@ class TaskRead(ORMModel):
 
 class TaskListResponse(BaseModel):
     items: list[TaskRead]
-

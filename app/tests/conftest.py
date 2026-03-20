@@ -7,13 +7,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+os.environ["ENVIRONMENT"] = "test"
+os.environ["DATABASE_URL"] = "sqlite://"
+
 from app.api.deps import get_db
 from app.db.base import Base
-from app.models.user import User
-
-os.environ["ENVIRONMENT"] = "test"
-
 from app.main import app
+from app.models.user import User
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite://"

@@ -8,7 +8,7 @@ from app.schemas.task import TaskRead
 
 
 class BacklogCreate(BaseModel):
-    user_id: str
+    user_id: str | None = None
     title: str
     description: str | None = None
     importance_score: int = Field(default=1, ge=1, le=5)
@@ -45,4 +45,3 @@ class BacklogRead(ORMModel):
 class BacklogAssignmentResponse(BaseModel):
     backlog: BacklogRead
     task: TaskRead
-

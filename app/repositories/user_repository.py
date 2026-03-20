@@ -16,6 +16,9 @@ class UserRepository:
         self.db.flush()
         return user
 
+    def get_by_email(self, email: str) -> User | None:
+        stmt = select(User).where(User.email == email)
+        return self.db.scalar(stmt)
+
     def list_all(self) -> list[User]:
         return list(self.db.scalars(select(User).order_by(User.created_at.desc())).all())
-

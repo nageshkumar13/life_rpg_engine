@@ -6,8 +6,8 @@ from app.schemas.common import ORMModel
 
 
 class UserCreate(BaseModel):
-    id: str
     email: EmailStr
+    password: str
 
 
 class UserRead(ORMModel):
@@ -19,4 +19,3 @@ class UserRead(ORMModel):
     best_streak: int
     created_at: datetime
     updated_at: datetime
-

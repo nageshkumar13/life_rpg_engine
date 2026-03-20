@@ -8,7 +8,7 @@ from app.schemas.habit_log import HabitLogRead
 
 
 class HabitCreate(BaseModel):
-    user_id: str
+    user_id: str | None = None
     title: str
     description: str | None = None
     unit_type: HabitUnitType = HabitUnitType.MINUTES
@@ -37,4 +37,3 @@ class HabitRead(ORMModel):
     created_at: datetime
     updated_at: datetime
     logs: list[HabitLogRead] = []
-

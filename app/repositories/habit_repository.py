@@ -23,3 +23,5 @@ class HabitRepository:
             stmt = stmt.where(Habit.is_active.is_(True))
         return list(self.db.scalars(stmt.order_by(Habit.created_at.desc())).all())
 
+    def delete(self, habit: Habit) -> None:
+        self.db.delete(habit)

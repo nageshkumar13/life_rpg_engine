@@ -36,14 +36,17 @@ class HabitService:
     def list_habits(self, user_id: str) -> list[Habit]:
         return self.habit_repository.list_for_user(user_id)
 
-    def get_habit(self, habit_id: str) -> Habit:
+    def _get_owned_habit(self, user_id: str, habit_id: str) -> Habit:
         habit = self.habit_repository.get(habit_id)
-        if not habit:
+        if not habit or habit.user_id != user_id:
             raise NotFoundError("Habit not found")
         return habit
 
-    def update_habit(self, habit_id: str, payload: HabitUpdate) -> Habit:
-        habit = self.get_habit(habit_id)
+    def get_habit(self, user_id: str, habit_id: str) -> Habit:
+        return self._get_owned_habit(user_id, habit_id)
+
+    def update_habit(self, user_id: str, habit_id: str, payload: HabitUpdate) -> Habit:
+        habit = self.get_habit(user_id, habit_id)
         for field, value in payload.model_dump(exclude_unset=True).items():
             setattr(habit, field, value)
         self.db.add(habit)
@@ -51,16 +54,21 @@ class HabitService:
         self.db.refresh(habit)
         return habit
 
-    def deactivate_habit(self, habit_id: str) -> Habit:
-        habit = self.get_habit(habit_id)
+    def deactivate_habit(self, user_id: str, habit_id: str) -> Habit:
+        habit = self.get_habit(user_id, habit_id)
         habit.is_active = False
         self.db.add(habit)
         self.db.commit()
         self.db.refresh(habit)
         return habit
 
-    def log_completion(self, habit_id: str, log_date: date, actual_minutes: int) -> HabitLog:
-        habit = self.get_habit(habit_id)
+    def delete_habit(self, user_id: str, habit_id: str) -> None:
+        habit = self.get_habit(user_id, habit_id)
+        self.habit_repository.delete(habit)
+        self.db.commit()
+
+    def log_completion(self, user_id: str, habit_id: str, log_date: date, actual_minutes: int) -> HabitLog:
+        habit = self.get_habit(user_id, habit_id)
         log = self.log_repository.get_for_day(habit.id, log_date)
         if not log:
             log = HabitLog(id=new_id(), habit_id=habit.id, user_id=habit.user_id, log_date=log_date)
@@ -95,8 +103,8 @@ class HabitService:
         self.db.refresh(log)
         return log
 
-    def mark_missed(self, habit_id: str, log_date: date) -> HabitLog:
-        habit = self.get_habit(habit_id)
+    def mark_missed(self, user_id: str, habit_id: str, log_date: date) -> HabitLog:
+        habit = self.get_habit(user_id, habit_id)
         log = self.log_repository.get_for_day(habit.id, log_date)
         if not log:
             log = HabitLog(id=new_id(), habit_id=habit.id, user_id=habit.user_id, log_date=log_date)
